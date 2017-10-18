@@ -1,4 +1,4 @@
-function init () {
+(function () {
   var canvas = document.getElementById('root')
   const ROW_NUMBER = 40
   var ctx = canvas.getContext('2d')
@@ -141,50 +141,4 @@ function init () {
         break
     }
   }
-
-  document.addEventListener('touchstart', handleTouchStart, false)
-  document.addEventListener('touchmove', handleTouchMove, false)
-
-  var xDown = null
-  var yDown = null
-
-  function handleTouchStart (evt) {
-    xDown = evt.touches[0].clientX
-    yDown = evt.touches[0].clientY
-  }
-
-  function handleTouchMove (evt) {
-    if (!xDown || !yDown) {
-      return
-    }
-
-    var xUp = evt.touches[0].clientX
-    var yUp = evt.touches[0].clientY
-
-    var xDiff = xDown - xUp
-    var yDiff = yDown - yUp
-
-    if (Math.abs(xDiff) > Math.abs(yDiff)) { /* most significant */
-      if (xDiff > 0) {
-        /* left swipe */
-        if (direction !== 'right') { direction = 'left' }
-      } else {
-        /* right swipe */
-        if (direction !== 'left') { direction = 'right' }
-      }
-    } else {
-      if (yDiff > 0) {
-        /* up swipe */
-        if (direction !== 'down') { direction = 'up' }
-      } else {
-        /* down swipe */
-        if (direction !== 'up') { direction = 'down' }
-      }
-    }
-    /* reset values */
-    xDown = null
-    yDown = null
-  }
-}
-
-init()
+})()
