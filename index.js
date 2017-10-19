@@ -1,11 +1,14 @@
-(function () {
-  var canvas = document.getElementById('root')
+(function init () {
+  const canvas = document.getElementById('root')
+  const ctx = canvas.getContext('2d')
+  setWindowSize()
   const ROW_NUMBER = 40
-  var ctx = canvas.getContext('2d')
-  var w = window.innerWidth
-  var h = window.innerHeight
-  canvas.height = w > h ? h - 150 : w - 150
-  canvas.width = canvas.height
+  const COLOR = {
+    SNAKE: '#ffffff',
+    FOOD: '#009900',
+    BACKGROUND: '#000000'
+  }
+  const DIRECTION = { LEFT: 'left', RIGHT: 'right', UP: 'up', DOWN: 'down' }
   w = canvas.width
   var direction = 'right'
   var cw = w / ROW_NUMBER
@@ -15,10 +18,10 @@
   var isPause = true
   var timer
 
-  ctx.fillStyle = '#000000'
+  ctx.fillStyle = COLOR.BACKGROUND
   ctx.fillRect(0, 0, w, w)
 
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = COLOR.SNAKE
   var snake = []
   for (let i = 0; i < 5; i++) {
     let position = {}
@@ -30,14 +33,14 @@
   genarateFood()
   // var timer = setInterval(updateFrame, speed);
   function updateFrame () {
-    ctx.fillStyle = '#000000'
+    ctx.fillStyle = COLOR.BACKGROUND
     ctx.fillRect(0, 0, w, w)
     drawSnake()
     drawFood()
   }
 
   function drawFood () {
-    ctx.fillStyle = '#009900'
+    ctx.fillStyle = COLOR.FOOD
     ctx.fillRect(food.x * cw, food.y * cw, cw, cw)
   }
   function newFood (x, y) {
@@ -53,7 +56,7 @@
     snake.findIndex(value => value.x === x && value.y === y) > -1 ? genarateFood() : newFood(x, y)
   }
   function drawSnake () {
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = COLOR.SNAKE
     theLast = {}
     theLast.x = snake[snake.length - 1].x
     theLast.y = snake[snake.length - 1].y
@@ -62,16 +65,16 @@
       snake[i].y = snake[i - 1].y
     }
     switch (direction) {
-      case 'right':
+      case DIRECTION.RIGHT:
         snake[0].x++
         break
-      case 'left':
+      case DIRECTION.LEFT:
         snake[0].x--
         break
-      case 'up':
+      case DIRECTION.UP:
         snake[0].y--
         break
-      case 'down':
+      case DIRECTION.DOWN:
         snake[0].y++
         break
     }
@@ -121,16 +124,16 @@
   document.onkeydown = function (e) {
     switch (e.keyCode) {
       case 37:
-        if (direction !== 'right') { direction = 'left' }
+        if (direction !== DIRECTION.RIGHT) { direction = DIRECTION.LEFT }
         break
       case 38:
-        if (direction !== 'down') { direction = 'up' }
+        if (direction !== DIRECTION.DOWN) { direction = DIRECTION.UP }
         break
       case 39:
-        if (direction !== 'left') { direction = 'right' }
+        if (direction !== DIRECTION.LEFT) { direction = DIRECTION.RIGHT }
         break
       case 40:
-        if (direction !== 'up') { direction = 'down' }
+        if (direction !== DIRECTION.UP) { direction = DIRECTION.DOWN }
         break
       case 32:
         console.log('space pressed')
@@ -141,4 +144,13 @@
         break
     }
   }
+
+  // region: Utils
+  function setWindowSize () {
+    let w = window.innerWidth
+    let h = window.innerHeight
+    canvas.width = w > h ? h - 150 : w - 150
+    canvas.height = canvas.width
+  }
+  // endregion
 })()
