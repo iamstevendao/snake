@@ -1,5 +1,6 @@
 const SIZE = getSize()
-const UNIT = SIZE / 20
+const ROW = 20
+const UNIT = SIZE / ROW
 const DIRECTION = { LEFT: 'l', RIGHT: 'r', UP: 'u', DOWN: 'd' }
 
 var game = new Phaser.Game(SIZE, SIZE, Phaser.AUTO, 'root', { preload: preload, create: create, update: update })
@@ -22,11 +23,12 @@ function create () {
   // snake
   snake = game.add.sprite(UNIT, 0, 'snake')
   snake.width = snake.height = UNIT
+
   game.physics.arcade.enable(snake)
+  snake.body.collideWorldBounds = true
 
   // food
-  food = game.add.sprite(UNIT * 2, 0, 'food')
-  food.width = food.height = UNIT
+  generateFood()
 
   // arrow keys pressed
   game.input.keyboard.onDownCallback = function (e) {
@@ -35,8 +37,24 @@ function create () {
 }
 
 function update () {
+  game.physics.arcade.overlap(snake, food, eatFood, null, this)
+}
 
-  // key pressed
+function eatFood (snake, food) {
+  console.log('ate')
+  food.kill()
+  generateFood()
+}
+
+function generateFood () {
+  food = game.add.sprite(random(ROW) * UNIT, random(ROW) * UNIT, 'food')
+  food.enableBody = true
+  food.width = food.height = UNIT
+  console.log(food)
+}
+
+function random (x) {
+  return Math.floor(Math.random() * x)
 }
 
 function getSize () {
@@ -57,7 +75,6 @@ function handleCursors (e) {
       if (getDirection() !== DIRECTION.LEFT) { go(DIRECTION.RIGHT) }
       break
     case 40:
-      console.log(getDirection())
       if (getDirection() !== DIRECTION.UP) { go(DIRECTION.DOWN) }
       break
   }
@@ -89,7 +106,7 @@ function getDirection () {
     return DIRECTION.DOWN
   else if (snake.body.velocity.y < 0)
     return DIRECTION.UP
-  if (snake.body.velocity.x > 0)
+  else if (snake.body.velocity.x > 0)
     return DIRECTION.LEFT
   else return DIRECTION.RIGHT
 }
