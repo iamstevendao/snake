@@ -11,11 +11,15 @@ function preload () {
   game.load.image('background', 'assets/background.jpg')
 }
 var snake
-var speed = 50
+var speed
 var food
 var cursors
 function create () {
   game.physics.startSystem(Phaser.Physics.ARCADE)
+
+  // initialize variables
+  initialize()
+
   // background
   let bg = game.add.sprite(0, 0, 'background')
   bg.width = bg.height = SIZE
@@ -40,17 +44,19 @@ function update () {
   game.physics.arcade.overlap(snake, food, eatFood, null, this)
 }
 
+
+function initialize () {
+  speed = UNIT * 5
+}
 function eatFood (snake, food) {
-  console.log('ate')
   food.kill()
   generateFood()
 }
 
 function generateFood () {
   food = game.add.sprite(random(ROW) * UNIT, random(ROW) * UNIT, 'food')
-  food.enableBody = true
+  game.physics.arcade.enable(food)
   food.width = food.height = UNIT
-  console.log(food)
 }
 
 function random (x) {
