@@ -10,7 +10,7 @@ function preload () {
   game.load.image('food', 'assets/food.png')
   game.load.image('background', 'assets/background.jpg')
 }
-var snake
+var snake = []
 var speed
 var food
 var cursors
@@ -25,14 +25,10 @@ function create () {
   bg.width = bg.height = SIZE
 
   // snake
-  snake = game.add.sprite(UNIT, 0, 'snake')
-  snake.width = snake.height = UNIT
-
-  game.physics.arcade.enable(snake)
-  snake.body.collideWorldBounds = true
+  createSnake()
 
   // food
-  generateFood()
+  createFood()
 
   // arrow keys pressed
   game.input.keyboard.onDownCallback = function (e) {
@@ -41,6 +37,7 @@ function create () {
 }
 
 function update () {
+  updateSnake()
   game.physics.arcade.overlap(snake, food, eatFood, null, this)
 }
 
@@ -50,10 +47,22 @@ function initialize () {
 }
 function eatFood (snake, food) {
   food.kill()
-  generateFood()
+  createFood()
 }
 
-function generateFood () {
+function createSnake () {
+  snake = game.add.group()
+  snake.enableBody = true
+  game.physics.arcade.enable(snake)
+
+  for (let i = 5; i > 0; i--) {
+    let sn = snake.create(i * UNIT, 0, 'snake')
+    sn.width = sn.height = UNIT
+    sn.body.velocity.x = speed
+  }
+}
+
+function createFood () {
   food = game.add.sprite(random(ROW) * UNIT, random(ROW) * UNIT, 'food')
   game.physics.arcade.enable(food)
   food.width = food.height = UNIT
@@ -89,30 +98,38 @@ function handleCursors (e) {
 function go (direction) {
   switch (direction) {
     case DIRECTION.LEFT:
-      snake.body.velocity.y = 0
-      snake.body.velocity.x = 0 - speed
+      updateVelocity(0 - speed, 0)
       break
     case DIRECTION.RIGHT:
-      snake.body.velocity.y = 0
-      snake.body.velocity.x = speed
+      updateVelocity(speed, 0)
       break
     case DIRECTION.UP:
-      snake.body.velocity.y = 0 - speed
-      snake.body.velocity.x = 0
+      updateVelocity(0, 0 - speed)
       break
     case DIRECTION.DOWN:
-      snake.body.velocity.y = speed
-      snake.body.velocity.x = 0
+      updateVelocity(0, speed)
       break
   }
 }
 
+function updateVelocity (vx, vy) {
+  snake.children[0].body.velocity.y = vy
+  snake.children[0].body.velocity.x = vx
+}
+
+function updateSnake () {
+  for (let i = snake.children.length - 1; i > 0; i--) {
+    //snake.children[i].body.velocity = snake.children[i - 1].body.velocity;
+    game.physics.arcade.moveToXY(snake.children[i], snake.children[i - 1].x, snake.children[i - 1].y)
+  }
+}
+
 function getDirection () {
-  if (snake.body.velocity.y > 0)
+  if (snake.children[0].body.velocity.y > 0)
     return DIRECTION.DOWN
-  else if (snake.body.velocity.y < 0)
+  else if (snake.children[0].body.velocity.y < 0)
     return DIRECTION.UP
-  else if (snake.body.velocity.x > 0)
+  else if (snake.children[0].body.velocity.x > 0)
     return DIRECTION.LEFT
   else return DIRECTION.RIGHT
 }
