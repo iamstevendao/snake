@@ -1,11 +1,13 @@
-const SIZE = getSize()
-const UNIT = 20
-const DIRECTION = { LEFT: 0, RIGHT: 1, UP: 2, DOWN: 3 }
+const SIZE = getSize() // size of game world
+const UNIT = 20 // size of element
+const SPACER = 3 // space between elements in of the tail
+const DIRECTION = { LEFT: 2, RIGHT: 0, UP: 1, DOWN: 3 } // direction, order in the sprite sheet
 
 var game = new Phaser.Game(SIZE, SIZE, Phaser.AUTO, 'root', { preload: preload, create: create, update: update })
 
 function preload () {
   game.load.image('snake', 'assets/snake.png')
+  game.load.spritesheet('head', 'assets/head.png', 75, 75)
   game.load.image('food', 'assets/food.png')
   game.load.image('background', 'assets/background.jpg')
 }
@@ -48,8 +50,14 @@ function update () {
   updateSnake()
 }
 
+function updateSpeed () {
+  // increase speed by 10% every after eats 3 food
+  if (tail.length % 3 === 0)
+    speed *= 11 / 10
+}
+
 function createPath () {
-  for (let i = 0; i <= tail.length * UNIT / 2; i++) {
+  for (let i = 0; i <= tail.length * SPACER; i++) {
     snakePath[i] = new Phaser.Point(0, 0)
   }
 }
@@ -65,20 +73,20 @@ function initialize () {
 }
 
 function createSnake () {
+  // snake tail
+  for (let i = 1; i < 5; i++) {
+    tail[i] = game.add.sprite(0, 0, 'snake')
+    tail[i].width = tail[i].height = UNIT
+  }
+
   // snake head
-  head = game.add.sprite(0, 0, 'snake')
+  head = game.add.sprite(0, 0, 'head')
   head.width = head.height = UNIT
 
   // snake physics
   game.physics.arcade.enable(head)
   head.body.velocity.x = speed
   head.body.collideWorldBounds = true
-
-  // snake tail
-  for (let i = 1; i < 5; i++) {
-    tail[i] = game.add.sprite(0, 0, 'snake')
-    tail[i].width = tail[i].height = UNIT
-  }
 }
 
 function createFood () {
@@ -88,9 +96,14 @@ function createFood () {
 }
 
 function eatFood (snake, food) {
+  // grow
   grow()
+  // bring the head to the top again
+  game.world.bringToTop(head)
+  // kill current food and make a new one
   food.kill()
   createFood()
+  updateSpeed()
 }
 
 function grow () {
@@ -100,14 +113,16 @@ function grow () {
 
 function growTail () {
   let lastOfTail = tail[tail.length - 1]
+
   let sn = game.add.sprite(lastOfTail.x, lastOfTail.y, 'snake')
   sn.width = sn.height = UNIT
+
   tail.push(sn)
 }
 
 function growPath () {
   let oldLength = tail.length - 1
-  for (let i = oldLength * UNIT / 2 + 1; i <= (oldLength + 1) * UNIT / 2; i++) {
+  for (let i = oldLength * SPACER + 1; i <= (oldLength + 1) * SPACER; i++) {
     snakePath[i] = new Phaser.Point(tail[oldLength].x, tail[oldLength].y)
   }
 }
@@ -123,7 +138,7 @@ function getSize () {
 }
 
 function handleCursors (e) {
-  let currentDirection = getDirection
+  let currentDirection = getDirection()
   switch (e.keyCode) {
     case 37:
       if (currentDirection !== DIRECTION.RIGHT) { go(DIRECTION.LEFT) }
@@ -141,6 +156,10 @@ function handleCursors (e) {
 }
 
 function go (direction) {
+  // set frame
+  head.frame = direction
+
+  // update velocity based on the direction
   switch (direction) {
     case DIRECTION.LEFT:
       updateVelocity(0 - speed, 0)
@@ -164,8 +183,8 @@ function updateVelocity (vx, vy) {
 
 function updateSnake () {
   for (let i = 1; i < tail.length; i++) {
-    tail[i].x = snakePath[i * UNIT / 2].x
-    tail[i].y = snakePath[i * UNIT / 2].y
+    tail[i].x = snakePath[i * SPACER].x
+    tail[i].y = snakePath[i * SPACER].y
   }
 }
 
