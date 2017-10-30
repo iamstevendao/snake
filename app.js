@@ -9,7 +9,8 @@ function preload () {
   game.load.image('food', 'assets/food.png')
   game.load.image('background', 'assets/background.jpg')
 }
-var snake = []
+var head
+var tail = new Array()
 var snakePath = new Array()
 var speed
 var food
@@ -40,21 +41,20 @@ function create () {
 }
 
 function update () {
-  game.physics.arcade.overlap(snake.children[0], food, eatFood, null, this)
+  game.physics.arcade.overlap(head, food, eatFood, null, this)
   updatePath()
   updateSnake()
-  console.log('0: ', snake.children[1].x, ' 1: ', snake.children[0].y)
 }
 
 function createPath () {
-  for (let i = 0; i <= (snake.children.length - 1) * UNIT; i++) {
+  for (let i = 0; i <= tail.length * UNIT / 2; i++) {
     snakePath[i] = new Phaser.Point(0, 0);
   }
 }
 
 function updatePath () {
   let path = snakePath.pop();
-  path.setTo(snake.children[0].x, snake.children[0].y);
+  path.setTo(head.x, head.y);
   snakePath.unshift(path);
 }
 
@@ -68,15 +68,20 @@ function eatFood (snake, food) {
 }
 
 function createSnake () {
-  snake = game.add.group()
-  snake.enableBody = true
-  game.physics.arcade.enable(snake)
+  // snake head
+  head = game.add.sprite(0, 0, 'snake')
+  head.width = head.height = UNIT
 
-  for (let i = 0; i < 5; i++) {
-    let sn = snake.create(0, 0, 'snake')
-    sn.width = sn.height = UNIT
+  // snake physics
+  game.physics.arcade.enable(head)
+  head.body.velocity.x = speed
+  head.body.collideWorldBounds = true
+
+  // snake tail
+  for (let i = 1; i < 5; i++) {
+    tail[i] = game.add.sprite(0, 0, 'snake')
+    tail[i].width = tail[i].height = UNIT
   }
-  snake.children[0].body.velocity.x = speed
 }
 
 function createFood () {
@@ -130,23 +135,23 @@ function go (direction) {
 }
 
 function updateVelocity (vx, vy) {
-  snake.children[0].body.velocity.y = vy
-  snake.children[0].body.velocity.x = vx
+  head.body.velocity.y = vy
+  head.body.velocity.x = vx
 }
 
 function updateSnake () {
-  for (let i = 1; i < snake.children.length; i++) {
-    snake.children[i].x = snakePath[i * UNIT].x;
-    snake.children[i].y = snakePath[i * UNIT].y;
+  for (let i = 1; i < tail.length; i++) {
+    tail[i].x = snakePath[i * UNIT / 2].x;
+    tail[i].y = snakePath[i * UNIT / 2].y;
   }
 }
 
 function getDirection () {
-  if (snake.children[0].body.velocity.y > 0)
+  if (head.body.velocity.y > 0)
     return DIRECTION.DOWN
-  else if (snake.children[0].body.velocity.y < 0)
+  else if (head.body.velocity.y < 0)
     return DIRECTION.UP
-  else if (snake.children[0].body.velocity.x > 0)
+  else if (head.body.velocity.x > 0)
     return DIRECTION.LEFT
   else return DIRECTION.RIGHT
 }
