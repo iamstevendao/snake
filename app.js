@@ -1,6 +1,5 @@
 const SIZE = getSize()
-const ROW = 20
-const UNIT = SIZE / ROW
+const UNIT = 20
 const DIRECTION = { LEFT: 'l', RIGHT: 'r', UP: 'u', DOWN: 'd' }
 
 var game = new Phaser.Game(SIZE, SIZE, Phaser.AUTO, 'root', { preload: preload, create: create, update: update })
@@ -11,6 +10,7 @@ function preload () {
   game.load.image('background', 'assets/background.jpg')
 }
 var snake = []
+var snakePath = new Array()
 var speed
 var food
 var cursors
@@ -27,6 +27,9 @@ function create () {
   // snake
   createSnake()
 
+  // points
+  createPath()
+
   // food
   createFood()
 
@@ -37,14 +40,28 @@ function create () {
 }
 
 function update () {
+  game.physics.arcade.overlap(snake.children[0], food, eatFood, null, this)
+  updatePath()
   updateSnake()
-  game.physics.arcade.overlap(snake, food, eatFood, null, this)
+  console.log('0: ', snake.children[1].x, ' 1: ', snake.children[0].y)
 }
 
+function createPath () {
+  for (let i = 0; i <= (snake.children.length - 1) * UNIT; i++) {
+    snakePath[i] = new Phaser.Point(0, 0);
+  }
+}
+
+function updatePath () {
+  let path = snakePath.pop();
+  path.setTo(snake.children[0].x, snake.children[0].y);
+  snakePath.unshift(path);
+}
 
 function initialize () {
   speed = UNIT * 5
 }
+
 function eatFood (snake, food) {
   food.kill()
   createFood()
@@ -55,15 +72,15 @@ function createSnake () {
   snake.enableBody = true
   game.physics.arcade.enable(snake)
 
-  for (let i = 5; i > 0; i--) {
-    let sn = snake.create(i * UNIT, 0, 'snake')
+  for (let i = 0; i < 5; i++) {
+    let sn = snake.create(0, 0, 'snake')
     sn.width = sn.height = UNIT
-    sn.body.velocity.x = speed
   }
+  snake.children[0].body.velocity.x = speed
 }
 
 function createFood () {
-  food = game.add.sprite(random(ROW) * UNIT, random(ROW) * UNIT, 'food')
+  food = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'food')
   game.physics.arcade.enable(food)
   food.width = food.height = UNIT
 }
@@ -118,9 +135,9 @@ function updateVelocity (vx, vy) {
 }
 
 function updateSnake () {
-  for (let i = snake.children.length - 1; i > 0; i--) {
-    //snake.children[i].body.velocity = snake.children[i - 1].body.velocity;
-    game.physics.arcade.moveToXY(snake.children[i], snake.children[i - 1].x, snake.children[i - 1].y)
+  for (let i = 1; i < snake.children.length; i++) {
+    snake.children[i].x = snakePath[i * UNIT].x;
+    snake.children[i].y = snakePath[i * UNIT].y;
   }
 }
 
