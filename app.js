@@ -62,11 +62,6 @@ function initialize () {
   speed = UNIT * 5
 }
 
-function eatFood (snake, food) {
-  food.kill()
-  createFood()
-}
-
 function createSnake () {
   // snake head
   head = game.add.sprite(0, 0, 'snake')
@@ -88,6 +83,30 @@ function createFood () {
   food = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'food')
   game.physics.arcade.enable(food)
   food.width = food.height = UNIT
+}
+
+function eatFood (snake, food) {
+  grow()
+  food.kill()
+  createFood()
+}
+
+function grow () {
+  growTail()
+  growPath()
+}
+
+function growTail () {
+  let lastOfTail = tail[tail.length - 1]
+  let sn = game.add.sprite(lastOfTail.x, lastOfTail.y, 'snake')
+  sn.width = sn.height = UNIT
+  tail.push(sn)
+}
+
+function growPath () {
+  for (let i = (tail.length - 1) * UNIT / 2 + 1; i <= tail.length * UNIT / 2; i++) {
+    snakePath[i] = new Phaser.Point(lastOfTail.x, lastOfTail.y)
+  }
 }
 
 function random (x) {
