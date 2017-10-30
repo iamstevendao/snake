@@ -42,6 +42,7 @@ function create () {
 
 function update () {
   game.physics.arcade.overlap(head, food, eatFood, null, this)
+  // game.physics.arcade.overlap(head, tail, die, null, this)
   updatePath()
   updateSnake()
 }
@@ -81,14 +82,18 @@ function createSnake () {
 
 function createFood () {
   food = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'food')
-  game.physics.arcade.enable(food)
   food.width = food.height = UNIT
+  game.physics.arcade.enable(food)
 }
 
 function eatFood (snake, food) {
   grow()
   food.kill()
   createFood()
+}
+
+function die (head, tail) {
+  console.log('die')
 }
 
 function grow () {
@@ -104,8 +109,9 @@ function growTail () {
 }
 
 function growPath () {
-  for (let i = (tail.length - 1) * UNIT / 2 + 1; i <= tail.length * UNIT / 2; i++) {
-    snakePath[i] = new Phaser.Point(lastOfTail.x, lastOfTail.y)
+  let oldLength = tail.length - 1
+  for (let i = oldLength * UNIT / 2 + 1; i <= (oldLength + 1) * UNIT / 2; i++) {
+    snakePath[i] = new Phaser.Point(tail[oldLength].x, tail[oldLength].y)
   }
 }
 
@@ -171,6 +177,6 @@ function getDirection () {
   else if (head.body.velocity.y < 0)
     return DIRECTION.UP
   else if (head.body.velocity.x > 0)
-    return DIRECTION.LEFT
-  else return DIRECTION.RIGHT
+    return DIRECTION.RIGHT
+  else return DIRECTION.LEFT
 }
