@@ -1,6 +1,6 @@
 const SIZE = getSize()
 const UNIT = 20
-const DIRECTION = { LEFT: 'l', RIGHT: 'r', UP: 'u', DOWN: 'd' }
+const DIRECTION = { LEFT: 0, RIGHT: 1, UP: 2, DOWN: 3 }
 
 var game = new Phaser.Game(SIZE, SIZE, Phaser.AUTO, 'root', { preload: preload, create: create, update: update })
 
@@ -9,12 +9,13 @@ function preload () {
   game.load.image('food', 'assets/food.png')
   game.load.image('background', 'assets/background.jpg')
 }
+
 var head
-var tail = new Array()
-var snakePath = new Array()
+var tail = []
+var snakePath = []
 var speed
 var food
-var cursors
+
 function create () {
   game.physics.startSystem(Phaser.Physics.ARCADE)
 
@@ -49,14 +50,14 @@ function update () {
 
 function createPath () {
   for (let i = 0; i <= tail.length * UNIT / 2; i++) {
-    snakePath[i] = new Phaser.Point(0, 0);
+    snakePath[i] = new Phaser.Point(0, 0)
   }
 }
 
 function updatePath () {
-  let path = snakePath.pop();
-  path.setTo(head.x, head.y);
-  snakePath.unshift(path);
+  let path = snakePath.pop()
+  path.setTo(head.x, head.y)
+  snakePath.unshift(path)
 }
 
 function initialize () {
@@ -92,10 +93,6 @@ function eatFood (snake, food) {
   createFood()
 }
 
-function die (head, tail) {
-  console.log('die')
-}
-
 function grow () {
   growTail()
   growPath()
@@ -126,18 +123,19 @@ function getSize () {
 }
 
 function handleCursors (e) {
+  let currentDirection = getDirection
   switch (e.keyCode) {
     case 37:
-      if (getDirection() !== DIRECTION.RIGHT) { go(DIRECTION.LEFT) }
+      if (currentDirection !== DIRECTION.RIGHT) { go(DIRECTION.LEFT) }
       break
     case 38:
-      if (getDirection() !== DIRECTION.DOWN) { go(DIRECTION.UP) }
+      if (currentDirection !== DIRECTION.DOWN) { go(DIRECTION.UP) }
       break
     case 39:
-      if (getDirection() !== DIRECTION.LEFT) { go(DIRECTION.RIGHT) }
+      if (currentDirection !== DIRECTION.LEFT) { go(DIRECTION.RIGHT) }
       break
     case 40:
-      if (getDirection() !== DIRECTION.UP) { go(DIRECTION.DOWN) }
+      if (currentDirection !== DIRECTION.UP) { go(DIRECTION.DOWN) }
       break
   }
 }
@@ -166,17 +164,17 @@ function updateVelocity (vx, vy) {
 
 function updateSnake () {
   for (let i = 1; i < tail.length; i++) {
-    tail[i].x = snakePath[i * UNIT / 2].x;
-    tail[i].y = snakePath[i * UNIT / 2].y;
+    tail[i].x = snakePath[i * UNIT / 2].x
+    tail[i].y = snakePath[i * UNIT / 2].y
   }
 }
 
 function getDirection () {
-  if (head.body.velocity.y > 0)
+  if (head.body.velocity.y > 0) {
     return DIRECTION.DOWN
-  else if (head.body.velocity.y < 0)
+  } else if (head.body.velocity.y < 0) {
     return DIRECTION.UP
-  else if (head.body.velocity.x > 0)
+  } else if (head.body.velocity.x > 0) {
     return DIRECTION.RIGHT
-  else return DIRECTION.LEFT
+  } else return DIRECTION.LEFT
 }
