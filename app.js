@@ -189,11 +189,18 @@ function updateSnake () {
 }
 
 function getDirection () {
-  if (head.body.velocity.y > 0) {
+  let v = head.body.velocity
+  if (v.y > 0) {
     return DIRECTION.DOWN
-  } else if (head.body.velocity.y < 0) {
+  }
+  if (v.y < 0) {
     return DIRECTION.UP
-  } else if (head.body.velocity.x > 0) {
+  }
+  if (v.x > 0) {
     return DIRECTION.RIGHT
-  } else return DIRECTION.LEFT
+  }
+  if (v.x < 0)
+    return DIRECTION.LEFT
+
+  return -1
 }
