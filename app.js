@@ -1,6 +1,7 @@
 const SIZE = getSize() // size of game world
 const UNIT = 20 // size of element
 const SPACER = 3 // space between elements in of the tail
+const SIZE_TAIL = 10
 const DIRECTION = { LEFT: 2, RIGHT: 0, UP: 1, DOWN: 3 } // direction, order in the sprite sheet
 
 var game = new Phaser.Game(SIZE, SIZE, Phaser.AUTO, 'root', { preload: preload, create: create, update: update })
@@ -8,7 +9,8 @@ var game = new Phaser.Game(SIZE, SIZE, Phaser.AUTO, 'root', { preload: preload, 
 function preload () {
   game.load.image('snake', 'assets/snake.png')
   game.load.spritesheet('head', 'assets/head.png', 75, 75)
-  game.load.image('food', 'assets/food.png')
+  game.load.image('food', 'assets/firstaid.png')
+  game.load.image('poision', 'assets/star.png')
   game.load.image('background', 'assets/background.jpg')
 }
 
@@ -17,6 +19,7 @@ var tail = []
 var snakePath = []
 var speed
 var food
+var poision
 
 function create () {
   game.physics.startSystem(Phaser.Physics.ARCADE)
@@ -36,6 +39,7 @@ function create () {
 
   // food
   createFood()
+  createPoision()
 
   // arrow keys pressed
   game.input.keyboard.onDownCallback = function (e) {
@@ -45,7 +49,15 @@ function create () {
 
 function update () {
   game.physics.arcade.overlap(head, food, eatFood, null, this)
+  game.physics.arcade.overlap(head, poision, eatPoision, null, this)
   // game.physics.arcade.overlap(head, tail, die, null, this)
+  // for (let i in snakePath) {
+  //   if (snakePath[i].x === head.x && snakePath[i].y === head.y) {
+  //     console.log(snakePath[i].x, ' - ', snakePath[i].y)
+  //     create()
+  //     break
+  //   }
+  // }
   updatePath()
   updateSnake()
 }
@@ -74,7 +86,7 @@ function initialize () {
 
 function createSnake () {
   // snake tail
-  for (let i = 1; i < 5; i++) {
+  for (let i = 1; i < SIZE_TAIL; i++) {
     tail[i] = game.add.sprite(0, 0, 'snake')
     tail[i].width = tail[i].height = UNIT
   }
@@ -93,6 +105,20 @@ function createFood () {
   food = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'food')
   food.width = food.height = UNIT
   game.physics.arcade.enable(food)
+  food.body.bounce.y = 1
+  food.body.bounce.x = 1
+  food.body.velocity.y = food.body.velocity.x = 100
+  food.body.collideWorldBounds = true
+}
+
+function createPoision () {
+  poision = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'poision')
+  poision.width = poision.height = UNIT
+  game.physics.arcade.enable(poision)
+  poision.body.bounce.y = 1
+  poision.body.bounce.x = 1
+  poision.body.velocity.y = poision.body.velocity.x = 100
+  poision.body.collideWorldBounds = true
 }
 
 function eatFood (snake, food) {
@@ -104,6 +130,10 @@ function eatFood (snake, food) {
   food.kill()
   createFood()
   updateSpeed()
+}
+
+function eatPoision (snake, poision) {
+  create()
 }
 
 function grow () {
