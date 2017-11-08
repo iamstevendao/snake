@@ -1,5 +1,5 @@
 const SIZE = getSize() // size of game world
-const UNIT = 20 // size of element
+const UNIT = SIZE / 20 // size of element
 const SPACER = 3 // space between elements in of the tail
 const SIZE_TAIL = 10
 const DIRECTION = { LEFT: 2, RIGHT: 0, UP: 1, DOWN: 3 } // direction, order in the sprite sheet
@@ -10,7 +10,7 @@ function preload () {
   game.load.image('snake', 'assets/snake.png')
   game.load.spritesheet('head', 'assets/head.png', 75, 75)
   game.load.image('food', 'assets/firstaid.png')
-  game.load.image('poision', 'assets/star.png')
+  game.load.image('poision', 'assets/poision.png')
   game.load.image('background', 'assets/background.jpg')
 }
 
@@ -31,15 +31,8 @@ function create () {
   let bg = game.add.sprite(0, 0, 'background')
   bg.width = bg.height = SIZE
 
-  // snake
-  createSnake()
-
-  // points
-  createPath()
-
-  // food
-  createFood()
-  createPoision()
+  // create all elements of the game
+  createElements()
 
   // arrow keys pressed
   game.input.keyboard.onDownCallback = function (e) {
@@ -48,13 +41,19 @@ function create () {
 }
 
 function update () {
-  game.physics.arcade.overlap(head, food, eatFood, null, this)
-  game.physics.arcade.overlap(head, poisions, eatPoision, null, this)
-
+  // handle the collision of snake and food and poision
+  handlePhysics()
+  // update the path were head and tail follow
   updatePath()
+  // update the head and tail
   updateSnake()
 }
 
+function handlePhysics () {
+  game.physics.arcade.overlap(head, food, eatFood, null, this)
+  game.physics.arcade.overlap(head, poisions, eatPoision, null, this)
+
+}
 function updateProperties () {
   // increase speed by 10% every after eats 3 food
   if (tail.length % 3 === 0)
@@ -73,13 +72,14 @@ function createPath () {
 }
 
 function updatePath () {
+  // remove the last one and make a new one as the current pos of the head  
   let path = snakePath.pop()
   path.setTo(head.x, head.y)
   snakePath.unshift(path)
 }
 
 function initialize () {
-  speed = UNIT * 5
+  speed = UNIT * 8
 }
 
 function createSnake () {
@@ -101,25 +101,28 @@ function createSnake () {
 
 function createFood () {
   food = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'food')
-  food.width = food.height = UNIT
+  food.width = food.height = UNIT * 1.3
   initializePhysicsProperties(food)
 }
 
 function createPoision () {
+  // new poision 
   let poision = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'poision')
-  poision.width = poision.height = UNIT
+  poision.width = poision.height = UNIT * 1.3
   initializePhysicsProperties(poision)
 
+  // push it into the array
   poisions.push(poision)
 }
 
 function initializePhysicsProperties (obj) {
+  // enable physics
   game.physics.arcade.enable(obj)
   obj.body.bounce.x = obj.body.bounce.y = 1
-  // random the object's velocity
-  obj.body.velocity.x = random(70) + 30
-  obj.body.velocity.y = random(70) + 30
   obj.body.collideWorldBounds = true
+  // random the object's velocity
+  obj.body.velocity.x = (random(0.8) + 0.4) * speed
+  obj.body.velocity.y = (random(0.8) + 0.4) * speed
 }
 
 function eatFood (snake, food) {
@@ -134,7 +137,7 @@ function eatFood (snake, food) {
 }
 
 function eatPoision (snake, poisions) {
-  create()
+  reset()
 }
 
 function grow () {
@@ -149,6 +152,32 @@ function growTail () {
   sn.width = sn.height = UNIT
 
   tail.push(sn)
+}
+
+function reset () {
+  destroyAll()
+  createElements();
+  initialize()
+}
+
+function createElements () {
+  createSnake()
+  createFood()
+  createPoision()
+  createPath()
+}
+
+function destroyAll () {
+  head.destroy()
+  tail.forEach((element) => {
+    element.destroy()
+  })
+  tail = []
+  food.destroy()
+  poisions.forEach((poision) => {
+    poision.destroy()
+  })
+  poisions = []
 }
 
 function growPath () {
