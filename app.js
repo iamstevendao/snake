@@ -19,7 +19,7 @@ var tail = []
 var snakePath = []
 var speed
 var food
-var poision
+var poisions = []
 
 function create () {
   game.physics.startSystem(Phaser.Physics.ARCADE)
@@ -49,23 +49,21 @@ function create () {
 
 function update () {
   game.physics.arcade.overlap(head, food, eatFood, null, this)
-  game.physics.arcade.overlap(head, poision, eatPoision, null, this)
-  // game.physics.arcade.overlap(head, tail, die, null, this)
-  // for (let i in snakePath) {
-  //   if (snakePath[i].x === head.x && snakePath[i].y === head.y) {
-  //     console.log(snakePath[i].x, ' - ', snakePath[i].y)
-  //     create()
-  //     break
-  //   }
-  // }
+  game.physics.arcade.overlap(head, poisions, eatPoision, null, this)
+
   updatePath()
   updateSnake()
 }
 
-function updateSpeed () {
+function updateProperties () {
   // increase speed by 10% every after eats 3 food
   if (tail.length % 3 === 0)
     speed *= 11 / 10
+
+  // create a new poision every after eats 3 food
+  // until reach the maximum of 5 poisions
+  if (tail.length % 8 === 0 && poisions.length < 5)
+    createPoision()
 }
 
 function createPath () {
@@ -104,21 +102,24 @@ function createSnake () {
 function createFood () {
   food = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'food')
   food.width = food.height = UNIT
-  game.physics.arcade.enable(food)
-  food.body.bounce.y = 1
-  food.body.bounce.x = 1
-  food.body.velocity.y = food.body.velocity.x = 100
-  food.body.collideWorldBounds = true
+  initializePhysicsProperties(food)
 }
 
 function createPoision () {
-  poision = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'poision')
+  let poision = game.add.sprite(random(SIZE - UNIT), random(SIZE - UNIT), 'poision')
   poision.width = poision.height = UNIT
-  game.physics.arcade.enable(poision)
-  poision.body.bounce.y = 1
-  poision.body.bounce.x = 1
-  poision.body.velocity.y = poision.body.velocity.x = 100
-  poision.body.collideWorldBounds = true
+  initializePhysicsProperties(poision)
+
+  poisions.push(poision)
+}
+
+function initializePhysicsProperties (obj) {
+  game.physics.arcade.enable(obj)
+  obj.body.bounce.x = obj.body.bounce.y = 1
+  // random the object's velocity
+  obj.body.velocity.x = random(70) + 30
+  obj.body.velocity.y = random(70) + 30
+  obj.body.collideWorldBounds = true
 }
 
 function eatFood (snake, food) {
@@ -129,10 +130,10 @@ function eatFood (snake, food) {
   // kill current food and make a new one
   food.kill()
   createFood()
-  updateSpeed()
+  updateProperties()
 }
 
-function eatPoision (snake, poision) {
+function eatPoision (snake, poisions) {
   create()
 }
 
