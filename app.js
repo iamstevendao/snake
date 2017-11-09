@@ -133,8 +133,14 @@ function initializePhysicsProperties (obj) {
   obj.body.bounce.setTo(1, 1)
   obj.body.collideWorldBounds = true
   // random the object's velocity
-  obj.body.velocity.x = (random(0.9) + 0.4) * speed
-  obj.body.velocity.y = (random(0.9) + 0.4) * speed
+  obj.body.velocity.x = randomSpeed()
+  obj.body.velocity.y = randomSpeed()
+}
+
+function randomSpeed () {
+  let sign = random(1) < 0.5 ? -1 : 1
+  let base = random(0.9) + 0.4
+  return base * sign * speed
 }
 
 function eatFood (snake, food) {
