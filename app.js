@@ -1,6 +1,6 @@
 const SIZE = getSize() // size of game world
 const UNIT = SIZE / 20 // size of element
-const SPACER = 2 // space between elements in of the tail
+const SPACER = 2 // space between elements of the tail
 const SIZE_TAIL = 10 // initial size of tail
 const TAIL_ADDING = 3 // number of dots added to tail when grows
 const DIRECTION = { LEFT: 2, RIGHT: 0, UP: 1, DOWN: 3 } // direction, order in the sprite sheet
@@ -51,16 +51,18 @@ function update () {
 }
 
 function handlePhysics () {
-  collideBounds()
-  game.physics.arcade.overlap(head, food, eatFood, null, this)
-  game.physics.arcade.overlap(head, poisions, eatPoision, null, this)
+  collideBounds() // check if snake collide game's bounds
+  game.physics.arcade.overlap(head, food, eatFood, null, this) // eat food
+  game.physics.arcade.overlap(head, poisions, reset, null, this) // eat poision
 }
 
 function collideBounds () {
   if (head.x >= game.world.height ||
     head.x < 0 ||
     head.y < 0 ||
-    head.y >= game.world.width) { reset() }
+    head.y >= game.world.width) {
+    reset()
+  }
 }
 function updateProperties () {
   // increase speed by 10% every after eats 3 food
@@ -72,6 +74,7 @@ function updateProperties () {
 }
 
 function foodEaten () {
+  // return number of food eaten so far
   return (tail.length - SIZE_TAIL) / TAIL_ADDING
 }
 
@@ -82,7 +85,7 @@ function createPath () {
 }
 
 function updatePath () {
-  // remove the last one and make a new one as the current pos of the head
+  // remove the last one and make a new one at the current pos of the head
   let path = snakePath.pop()
   path.setTo(head.x, head.y)
   snakePath.unshift(path)
@@ -130,8 +133,8 @@ function initializePhysicsProperties (obj) {
   obj.body.bounce.setTo(1, 1)
   obj.body.collideWorldBounds = true
   // random the object's velocity
-  obj.body.velocity.x = (random(0.8) + 0.4) * speed
-  obj.body.velocity.y = (random(0.8) + 0.4) * speed
+  obj.body.velocity.x = (random(0.9) + 0.4) * speed
+  obj.body.velocity.y = (random(0.9) + 0.4) * speed
 }
 
 function eatFood (snake, food) {
@@ -142,11 +145,8 @@ function eatFood (snake, food) {
   // kill current food and make a new one
   food.kill()
   createFood()
+  // update speed and number of poision
   updateProperties()
-}
-
-function eatPoision (snake, poisions) {
-  reset()
 }
 
 function grow () {
@@ -203,6 +203,7 @@ function random (x) {
 }
 
 function getSize () {
+  // get the smaller dimension
   let w = window.innerWidth
   let h = window.innerHeight
   return w > h ? h - 150 : w - 150
@@ -211,16 +212,16 @@ function getSize () {
 function handleCursors (e) {
   let currentDirection = getDirection()
   switch (e.keyCode) {
-    case 37:
+    case 37: // left
       if (currentDirection !== DIRECTION.RIGHT) { go(DIRECTION.LEFT) }
       break
-    case 38:
+    case 38: // up
       if (currentDirection !== DIRECTION.DOWN) { go(DIRECTION.UP) }
       break
-    case 39:
+    case 39: // right
       if (currentDirection !== DIRECTION.LEFT) { go(DIRECTION.RIGHT) }
       break
-    case 40:
+    case 40: // down
       if (currentDirection !== DIRECTION.UP) { go(DIRECTION.DOWN) }
       break
   }
@@ -270,7 +271,8 @@ function getDirection () {
   if (v.x > 0) {
     return DIRECTION.RIGHT
   }
-  if (v.x < 0) { return DIRECTION.LEFT }
-
+  if (v.x < 0) {
+    return DIRECTION.LEFT
+  }
   return -1
 }
